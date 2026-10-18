@@ -160,6 +160,3 @@ async def delete_user(current_user_id, db):
     await db.commit()
     await del_user_cache()
     return "User has been deleted"
-
-
-# git staging test 2
