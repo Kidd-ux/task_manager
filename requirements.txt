@@ -1,0 +1,9 @@
+fastapi
+uvicorn
+sqlalchemy[asyncio]
+asyncpg
+alembic
+pyjwt
+pwdlib[argon2]
+redis
+dotnev
