@@ -20,7 +20,7 @@ class UserCreate(BaseModel):
 class UserUpdate(BaseModel):
     username: str | None = None
     email: str | None = None
-    age: int | None = None
+    age: int | None = Field(None, ge=1)
 
 
 class UserStatsResponse(BaseModel):

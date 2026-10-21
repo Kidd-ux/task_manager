@@ -109,3 +109,9 @@ async def test_hash_password(client):
     assert res is not None
     assert res.password_hash is not None
     assert res.password_hash != data["password"]
+
+
+def test_patch_users_age(client, auth_headers):
+    response = client.patch("/users/me", json={"age": -1}, headers=auth_headers)
+    assert response.status_code == 422
+    assert response.json()["detail"][0]["loc"] == ["body", "age"]
