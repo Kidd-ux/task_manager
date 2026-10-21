@@ -113,5 +113,5 @@ async def test_hash_password(client):
 
 def test_patch_users_age(client, auth_headers):
     response = client.patch("/users/me", json={"age": -1}, headers=auth_headers)
-    print(response.json())
     assert response.status_code == 422
+    assert response.json()["detail"][0]["loc"] == ["body", "age"]
