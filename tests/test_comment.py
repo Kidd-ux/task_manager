@@ -166,3 +166,13 @@ def test_delete_comment_someone_else(client, comment_create, make_headers, user_
     comment = client.get(f"/comments/{comment_create['id']}")
     assert comment.status_code == 200
     assert comment.json()["text"] == comment_create["text"]
+
+
+def test_check_comments_cache(client, auth_headers, comment_create):
+    response = client.get("/comments")
+    assert response.status_code == 200
+    delete = client.delete(f"/tasks/{comment_create['task_id']}", headers=auth_headers)
+    assert delete.status_code == 200
+    cache = client.get("/comments")
+    assert cache.status_code == 200
+    assert cache.json() == []
