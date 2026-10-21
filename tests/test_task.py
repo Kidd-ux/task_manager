@@ -201,3 +201,11 @@ def test_delete_task_someone_else(
     task = client.get("/tasks")
     assert task.status_code == 200
     assert len(task.json()) == 1
+
+
+def test_patch_only_with_title(client, task_create, auth_headers):
+    response = client.patch(
+        f"/tasks/{task_create['id']}", json={"title": "new"}, headers=auth_headers
+    )
+    assert response.status_code == 200
+    assert response.json()["title"] == "new"
