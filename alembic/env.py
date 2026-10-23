@@ -2,13 +2,12 @@ from logging.config import fileConfig
 
 from sqlalchemy import pool
 from sqlalchemy.ext.asyncio import async_engine_from_config
-
+from config import DATABASE_URL
 from alembic import context
 from db import Base
 import models
 import os
 
-DATABASE_URL = os.getenv("DATABASE_URL")
 config = context.config
 
 if config.config_file_name is not None:

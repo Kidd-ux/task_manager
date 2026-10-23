@@ -11,10 +11,11 @@ from sqlalchemy import text
 from sqlalchemy.pool import NullPool
 from fastapi.testclient import TestClient
 import redis
+from config import TEST_DATABASE_URL
 
-TEST_DATABASE_URL = (
-    "postgresql+asyncpg://postgres:password@localhost:5432/task_manager_test"
-)
+if TEST_DATABASE_URL is None or not TEST_DATABASE_URL.endswith("_test"):
+    raise ValueError("TEST_DATABASE_URL is not correct, please check URL")
+
 test_engine = create_async_engine(TEST_DATABASE_URL, poolclass=NullPool)
 TestSessionLocal = async_sessionmaker(bind=test_engine, expire_on_commit=False)
 
