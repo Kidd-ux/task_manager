@@ -6,4 +6,4 @@ alembic
 pyjwt
 pwdlib[argon2]
 redis
-python-dotnev
+python-dotenv
