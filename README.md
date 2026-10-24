@@ -93,3 +93,16 @@ task_manager/
 ## Установка и запуск
 
 1. Клонируй репозиторий git clone https://github.com/Kidd-ux/task_manager
+
+2. Создай базу данных task_manager_test - ОБЯЗАТЕЛЬНО в конце "_test", для проверки unit тестов 
+
+3. Открой редактор кода(в папке в которой лежит репозиторий) и скопируй .env.example в .env
+
+4. SECRET_KEY сгенерировать комнадой в CMD - python -c "import secrets; print(secrets.token_hex(32))" и вставить в SECRET_KEY в .env
+
+5. Заполнить пароли в .env теми, которые указывали при создании бд
+
+6. Запусти Docker - docker compose up --build -d 
+
+7. Следом примени миграции - docker compose exec fastapi alembic upgrade head
+
