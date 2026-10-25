@@ -27,14 +27,14 @@ Training Task Manager - Это тренировочный диспетчер з�
 ```
 task_manager/
 ├── Dockerfile                  # Конфигурация Docker для контейнеризации приложения
-├── docker-compose.yml          # Оркестрация сервисов (БД, кеш)
+├── docker-compose.yml          # Приложение, бд, кеш
 ├── README.md                   # Документация проекта
 ├── requirements.txt            # Список зависимостей Python
 ├── main.py                     # Точка входа FastAPI приложения, обработка ошибок 
-├── conftest.py                 # Настройки тестовой БД
-|── config.py                   # я хз что конфиг у меня делает
+├── conftest.py                 # Чтение настроек (.env)
+├── config.py                   # я хз что конфиг у меня делает
 ├── db.py                       # Настройки подключения к БД
-│── models.py                   # ORM-модели  
+├── models.py                   # ORM-модели  
 |
 |
 ├── alembic/                    # Миграции базы данных
@@ -46,10 +46,10 @@ task_manager/
 |   |
 │   │
 │   ├── auth_service.py         # Бизнесс логика аутентификицаии 
-│   |── comment_service.py      # Бизнесс логика комментариев             
-│   │── project_service.py      # Бизнесс логика проектов   
-│   │── task_service.py         # Бизнесс логика задач
-|   |── user_service.py         # Бизнесс логика пользователей 
+│   ├── comment_service.py      # Бизнесс логика комментариев             
+│   ├── project_service.py      # Бизнесс логика проектов   
+│   ├── task_service.py         # Бизнесс логика задач
+|   └── user_service.py         # Бизнесс логика пользователей 
 │    
 │         
 │   
@@ -70,16 +70,16 @@ task_manager/
 │   └── user.py
 │  
 |
-│── cache/                 # Логика кеширования 
+├── cache/                 # Логика кеширования 
 |   ├── comment_cache.py
 |   ├── project_cache.py
 │   ├── task_cache.py           
-|   ├── user_cache.py
+|   └── user_cache.py
 │
 |
 |
 ├── auth/                       # Аутентификация 
-│   ├── security.py     # Хэширование паролей, создание текущего айди, подписание токена  
+│   └── security.py     # Хэширование паролей, создание текущего айди, подписание токена  
 |
 |
 |
@@ -87,22 +87,83 @@ task_manager/
     ├── test_comment.py
     ├── test_project.py
     ├── test_task.py
-    ├── test_user.py
+    └── test_user.py
 ```
 
-## Установка и запуск
+## Требования
 
-1. Клонируй репозиторий git clone https://github.com/Kidd-ux/task_manager
+- Docker и Docker Compose (для запуска приложения)
+- Python 3.11, Postgres и Redis на компьютере (только для запуска тестов)
 
-2. Создай базу данных task_manager_test - ОБЯЗАТЕЛЬНО в конце "_test", для проверки unit тестов 
+## Запуск через Docker
 
-3. Открой редактор кода(в папке в которой лежит репозиторий) и скопируй .env.example в .env
+1. Клонировать репозиторий и перейти в папку проекта:
 
-4. SECRET_KEY сгенерировать комнадой в CMD - python -c "import secrets; print(secrets.token_hex(32))" и вставить в SECRET_KEY в .env
+   ```bash
+   git clone https://github.com/Kidd-ux/task_manager
+   cd task_manager
+   ```
 
-5. Заполнить пароли в .env теми, которые указывали при создании бд
+2. Создать `.env` из шаблона:
 
-6. Запусти Docker - docker compose up --build -d 
+   ```bash
+   # Linux / macOS
+   cp .env.example .env
+   # Windows
+   copy .env.example .env
+   ```
 
-7. Следом примени миграции - docker compose exec fastapi alembic upgrade head
+3. Заполнить `.env`:
+   - `POSTGRES_PASSWORD` — придумать пароль. Для запуска тестов тот же пароль нужен в `DATABASE_URL` и `TEST_DATABASE_URL`.
+   - `SECRET_KEY` — подпись JWT-токенов, нужна случайная строка не короче 32 байт:
 
+     ```bash
+     python -c "import secrets; print(secrets.token_hex(32))"
+     ```
+
+4. Запустить контейнеры (приложение, PostgreSQL, Redis):
+
+   ```bash
+   docker compose up --build -d
+   ```
+
+5. Применить миграции (таблицы сами не создаются). Если база ещё не успела подняться и команда вернула ошибку подключения, повторить через несколько секунд:
+
+   ```bash
+   docker compose exec fastapi alembic upgrade head
+   ```
+
+6. Документация API (Swagger): <http://localhost:8000/docs>
+
+Остановить: `docker compose down` (данные базы сохраняются в томе `postgres_data`; `docker compose down -v` удаляет и их).
+
+## Использование API
+
+1. Создать пользователя: `POST /users`.
+2. Получить токен: `POST /auth/login` (email и пароль).
+3. В Swagger нажать **Authorize** и вставить токен. Запросы на создание, изменение и удаление требуют токен; чтение открыто всем.
+
+## Запуск тестов
+
+Тесты вызывают API и работают с настоящими PostgreSQL и Redis. Перед каждым тестом тестовая база и Redis очищаются.
+
+1. Установить зависимости: `pip install -r requirements.txt`
+2. Запустить PostgreSQL и Redis на адресах из `.env`.
+3. Создать пустую базу `task_manager_test`. Имя обязано заканчиваться на `_test`, иначе тесты не запустятся: так защищена рабочая база.
+4. Указать её в `TEST_DATABASE_URL` в `.env`.
+5. Создать в ней таблицы: выполнить `alembic upgrade head`, предварительно задав в этом терминале `DATABASE_URL` равным адресу тестовой базы.
+
+   ```bash
+   # Linux / macOS
+   export DATABASE_URL="<адрес тестовой базы>"
+   # Windows PowerShell
+   $env:DATABASE_URL="<адрес тестовой базы>"
+
+   alembic upgrade head
+   ```
+
+6. Запустить тесты:
+
+   ```bash
+   python -m pytest tests
+   ```
