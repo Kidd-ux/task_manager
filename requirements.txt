@@ -7,3 +7,6 @@ pyjwt
 pwdlib[argon2]
 redis
 python-dotenv
+pytest
+pytest-asyncio
+httpx

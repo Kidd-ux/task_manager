@@ -31,8 +31,8 @@ task_manager/
 ├── README.md                   # Документация проекта
 ├── requirements.txt            # Список зависимостей Python
 ├── main.py                     # Точка входа FastAPI приложения, обработка ошибок 
-├── conftest.py                 # Чтение настроек (.env)
-├── config.py                   # я хз что конфиг у меня делает
+├── conftest.py                 # Настройки фикстур и тестов
+├── config.py                   # Чтение настроек (.env)
 ├── db.py                       # Настройки подключения к БД
 ├── models.py                   # ORM-модели  
 |
